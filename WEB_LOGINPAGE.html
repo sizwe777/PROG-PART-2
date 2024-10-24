@@ -1,0 +1,555 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Lecturer/Coordinator/Manager</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px; /* Adjusted for sidebar */
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .form-container {
+            width: 33.3%;
+            padding: 50px;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+
+        .sidebar {
+            width: 300px;
+            padding: 20px;
+            background-color: #fff;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+            button:hover {
+                background-color: #0056b3;
+            }
+
+        .welcome-message,
+        .claims-section,
+        .coord-claims-section,
+        .manager-claims-section {
+            display: none;
+            background-color: #ffffff;
+            padding: 50px;
+            text-align: center;
+            border-radius: 10px;
+            box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Back link */
+        .back-link {
+            margin-top: 20px;
+            display: block;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            text-align: center;
+        }
+
+            .back-link:hover {
+                text-decoration: underline;
+            }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        td {
+            background-color: #e9ecef;
+        }
+
+        .status-approved {
+            background-color: #28a745;
+            color: white;
+            font-weight: bold;
+        }
+
+        .status-rejected {
+            background-color: #dc3545;
+            color: white;
+            font-weight: bold;
+        }
+
+        button.approve-btn {
+            background-color: #28a745;
+            color: white;
+        }
+
+        button.reject-btn {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .edit-btn,
+        .delete-btn {
+            background-color: #ffc107;
+            color: white;
+            cursor: pointer;
+        }
+
+        button.edit-btn {
+            background-color: #ffc107;
+        }
+
+        button.delete-btn {
+            background-color: #dc3545; /* Red for delete */
+        }
+
+        .notification {
+            background-color: #ffecb5;
+            padding: 10px;
+            margin-top: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container" id="loginContainer">
+        <!-- Lecturer Form -->
+        <div class="form-container" id="lecturerFormContainer">
+            <h1>Lecturer Login</h1>
+            <form id="lecturerForm">
+                <input type="text" id="lecturerName" placeholder="Lecturer Name" required>
+                <input type="email" placeholder="Lecturer Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <!-- Coordinator Form -->
+        <div class="form-container" id="coordinatorFormContainer">
+            <h1>Program Coordinator Login</h1>
+            <form id="coordinatorForm">
+                <input type="text" id="coordinatorName" placeholder="Coordinator Name" required>
+                <input type="email" placeholder="Coordinator Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+
+        <!-- Manager Form -->
+        <div class="form-container" id="managerFormContainer">
+            <h1>Manager Login</h1>
+            <form id="managerForm">
+                <input type="text" id="managerName" placeholder="Manager Name" required>
+                <input type="email" placeholder="Manager Email" required>
+                <input type="password" placeholder="Password" required>
+                <button type="submit">Submit</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Sidebar for Notifications -->
+    <div class="sidebar" id="notificationSidebar">
+        <h2>Pending Notifications</h2>
+        <div class="notification" id="pendingCount">
+            No pending claims
+        </div>
+
+        <!-- Track Claims Table under Pending Notifications -->
+        <h3>Your Pending Claims</h3>
+        <table id="pendingClaimsTable">
+            <thead>
+                <tr>
+                    <th>Claim ID</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="pendingClaimsBody"></tbody>
+        </table>
+    </div>
+
+    <!-- Welcome Message -->
+    <div class="welcome-message" id="welcomeMessage">
+        <h1>Welcome, <span id="userName"></span>!</h1>
+        <p>You have successfully logged in.</p>
+        <a href="#claimsSection" class="back-link">Proceed to Claims</a>
+        <a href="#loginContainer" class="back-link" onclick="backToLogin()">Back to Login</a>
+    </div>
+
+    <!-- Lecturer Claims Section -->
+    <div class="claims-section" id="claimsSection">
+        <h1>Lecturer Claim Submission</h1>
+        <form id="claimForm">
+            <input type="text" id="claimLecturerName" placeholder="Lecturer Name" required>
+            <input type="email" id="claimEmail" placeholder="E-Mail" required>
+            <input type="text" id="claimPG" placeholder="Program Group (PG)" required>
+            <input type="text" id="claimHC" placeholder="Hour Category (HC)" required>
+            <input type="number" step="0.01" id="claimHourlyRate" placeholder="Hourly Rate" required>
+            <input type="number" id="claimHoursWorked" placeholder="Hours Worked" required>
+            <input type="file" id="claimDocument" accept=".pdf,.doc,.docx,.ppt,.pptx" required>
+            <label for="claimDocument" id="fileLabel">Choose a file...</label>
+            <button type="submit">Submit Claim</button>
+        </form>
+
+        <h2>Your Submitted Claims</h2>
+        <table id="claimsTable">
+            <thead>
+                <tr>
+                    <th>Lecturer Name</th>
+                    <th>E-Mail</th>
+                    <th>Program Group</th>
+                    <th>Hour Category</th>
+                    <th>Hourly Rate</th>
+                    <th>Hours Worked</th>
+                    <th>Status</th>
+                    <th>Document</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <a href="#loginContainer" class="back-link" onclick="backToLogin()">Back to Login</a>
+    </div>
+
+    <!-- Coordinator Claims Section -->
+    <div class="coord-claims-section" id="coordClaimsSection">
+        <h1>Program Coordinator - Review Claims</h1>
+        <table id="coordClaimsTable">
+            <thead>
+                <tr>
+                    <th>Lecturer Name</th>
+                    <th>E-Mail</th>
+                    <th>Program Group</th>
+                    <th>Hour Category</th>
+                    <th>Hourly Rate</th>
+                    <th>Hours Worked</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <a href="#loginContainer" class="back-link" onclick="backToLogin()">Back to Login</a>
+    </div>
+
+    <!-- Manager Claims Section -->
+    <div class="manager-claims-section" id="managerClaimsSection">
+        <h1>Manager - Review All Claims</h1>
+        <table id="managerClaimsTable">
+            <thead>
+                <tr>
+                    <th>Lecturer Name</th>
+                    <th>E-Mail</th>
+                    <th>Program Group</th>
+                    <th>Hour Category</th>
+                    <th>Hourly Rate</th>
+                    <th>Hours Worked</th>
+                    <th>Status</th>
+                    <th>Comments</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+        </table>
+        <a href="#loginContainer" class="back-link" onclick="backToLogin()">Back to Login</a>
+    </div>
+
+    <script>
+        const loginContainer = document.getElementById('loginContainer');
+        const welcomeMessage = document.getElementById('welcomeMessage');
+        const userNameDisplay = document.getElementById('userName');
+        const claimsSection = document.getElementById('claimsSection');
+        const coordClaimsSection = document.getElementById('coordClaimsSection');
+        const managerClaimsSection = document.getElementById('managerClaimsSection');
+        const claimsTableBody = document.querySelector('#claimsTable tbody');
+        const coordClaimsTableBody = document.querySelector('#coordClaimsTable tbody');
+        const managerClaimsTableBody = document.querySelector('#managerClaimsTable tbody');
+        const pendingClaimsBody = document.querySelector('#pendingClaimsBody'); // Pending claims tracking
+        const pendingCountDisplay = document.getElementById('pendingCount'); // Sidebar notification
+
+        let claims = []; // Array to hold submitted claims
+
+        // Back to Login Functionality
+        function backToLogin() {
+            loginContainer.style.display = 'flex';
+            welcomeMessage.style.display = 'none';
+            claimsSection.style.display = 'none';
+            coordClaimsSection.style.display = 'none';
+            managerClaimsSection.style.display = 'none';
+            pendingCountDisplay.textContent = 'No pending claims'; // Reset pending count
+            pendingClaimsBody.innerHTML = ''; // Clear pending claims table
+            document.getElementById('lecturerForm').reset();  // Reset the forms
+            document.getElementById('coordinatorForm').reset();
+            document.getElementById('managerForm').reset();
+        }
+
+        // Handle Lecturer Form Submission
+        document.getElementById('lecturerForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const lecturerName = document.getElementById('lecturerName').value;
+            showWelcomeMessage(lecturerName);
+        });
+
+        // Handle Coordinator Form Submission
+        document.getElementById('coordinatorForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const coordinatorName = document.getElementById('coordinatorName').value;
+            showCoordinatorClaims();
+        });
+
+        // Handle Manager Form Submission
+        document.getElementById('managerForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const managerName = document.getElementById('managerName').value;
+            showManagerClaims();
+        });
+
+        // Show Welcome Message
+        function showWelcomeMessage(name) {
+            loginContainer.style.display = 'none';
+            userNameDisplay.textContent = name;
+            welcomeMessage.style.display = 'block';
+            claimsSection.style.display = 'block'; // Show the claims section after login
+        }
+
+        // Handle Lecturer Claim Form Submission
+        document.getElementById('claimForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const claimLecturerName = document.getElementById('claimLecturerName').value;
+            const claimEmail = document.getElementById('claimEmail').value;
+            const claimPG = document.getElementById('claimPG').value;
+            const claimHC = document.getElementById('claimHC').value;
+            const claimHourlyRate = document.getElementById('claimHourlyRate').value;
+            const claimHoursWorked = document.getElementById('claimHoursWorked').value;
+            const claimDocument = document.getElementById('claimDocument').files[0];
+
+            const newClaim = {
+                id: claims.length + 1, // Assign a unique ID
+                lecturerName: claimLecturerName,
+                email: claimEmail,
+                programGroup: claimPG,
+                hourCategory: claimHC,
+                hourlyRate: claimHourlyRate,
+                hoursWorked: claimHoursWorked,
+                status: 'Pending',
+                document: claimDocument.name // Store the name of the uploaded file
+            };
+
+            claimsTableBody.innerHTML += `
+                                            <tr>
+                                                <td>${claimLecturerName}</td>
+                                                <td>${claimEmail}</td>
+                                                <td>${claimPG}</td>
+                                                <td>${claimHC}</td>
+                                                <td>${claimHourlyRate}</td>
+                                                <td>${claimHoursWorked}</td>
+                                                <td class="status">${newClaim.status}</td>
+                                                <td>${claimDocument.name}</td>
+                                            </tr>
+                                        `;
+
+            claims.push(newClaim); // Add the new claim to the claims array
+            updatePendingCount(); // Update pending count in sidebar
+            document.getElementById('claimForm').reset();
+            loadPendingClaims();
+        });
+
+        // Load Pending Claims into the sidebar
+        function loadPendingClaims() {
+            pendingClaimsBody.innerHTML = ''; // Clear existing entries
+
+            claims.forEach((claim) => {
+                if (claim.status === 'Pending') {
+                    var row = `
+                            <tr>
+                                <td>${claim.id}</td>
+                                <td>${claim.status}</td>
+                            </tr>
+                        `;
+                    pendingClaimsBody.innerHTML += row;
+                }
+            });
+        }
+
+        // Show Coordinator Claims
+        function showCoordinatorClaims() {
+            loginContainer.style.display = 'none';
+            coordClaimsSection.style.display = 'block';
+            loadCoordinatorClaims();
+        }
+
+        // Load Coordinator Claims into the table
+        function loadCoordinatorClaims() {
+            coordClaimsTableBody.innerHTML = '';
+
+            claims.forEach((claim, index) => {
+                var row = `
+                                            <tr id="claim-${index}">
+                                                <td>${claim.lecturerName}</td>
+                                                <td>${claim.email}</td>
+                                                <td>${claim.programGroup}</td>
+                                                <td>${claim.hourCategory}</td>
+                                                <td>${claim.hourlyRate}</td>
+                                                <td>${claim.hoursWorked}</td>
+                                                <td class="status">${claim.status}</td>
+                                                <td>
+                                                    <button class="edit-btn" onclick="editClaim(${index})">Edit</button>
+                                                    <button class="delete-btn" onclick="deleteClaim(${index})">Delete</button>
+                                                    <button class="approve-btn" onclick="updateStatus(${index}, 'Approved')">Approve</button>
+                                                    <button class="reject-btn" onclick="updateStatus(${index}, 'Rejected')">Reject</button>
+                                                </td>
+                                            </tr>
+                                        `;
+                coordClaimsTableBody.innerHTML += row;
+            });
+
+            updatePendingCount(); // Update pending count in sidebar
+        }
+
+        // Update Pending Count in Sidebar
+        function updatePendingCount() {
+            const pendingClaims = claims.filter(claim => claim.status === 'Pending');
+            if (pendingClaims.length > 0) {
+                pendingCountDisplay.textContent = `You have ${pendingClaims.length} pending claims.`;
+            } else {
+                pendingCountDisplay.textContent = 'No pending claims';
+            }
+        }
+
+        // Edit Claim Functionality for Coordinator
+        function editClaim(index) {
+            const claim = claims[index];
+            document.getElementById('claimLecturerName').value = claim.lecturerName;
+            document.getElementById('claimEmail').value = claim.email;
+            document.getElementById('claimPG').value = claim.programGroup;
+            document.getElementById('claimHC').value = claim.hourCategory;
+            document.getElementById('claimHourlyRate').value = claim.hourlyRate;
+            document.getElementById('claimHoursWorked').value = claim.hoursWorked;
+
+            // Optionally, you can remove this claim first to edit it
+            deleteClaim(index);
+        }
+
+        // Delete Claim Functionality for Coordinator
+        function deleteClaim(index) {
+            claims.splice(index, 1);  // Remove the claim from the array
+            loadCoordinatorClaims();  // Reload the claims table
+            loadPendingClaims(); // Refresh pending claims in the sidebar
+            alert('Claim has been deleted.');
+        }
+
+        // Show Manager Claims
+        function showManagerClaims() {
+            loginContainer.style.display = 'none';
+            managerClaimsSection.style.display = 'block';
+            loadManagerClaims();
+        }
+
+        // Load Manager Claims into the table
+        function loadManagerClaims() {
+            managerClaimsTableBody.innerHTML = '';
+
+            claims.forEach((claim, index) => {
+                var row = `
+                                            <tr>
+                                                <td>${claim.lecturerName}</td>
+                                                <td>${claim.email}</td>
+                                                <td>${claim.programGroup}</td>
+                                                <td>${claim.hourCategory}</td>
+                                                <td>${claim.hourlyRate}</td>
+                                                <td>${claim.hoursWorked}</td>
+                                                <td class="status">${claim.status}</td>
+                                                <td>
+                                                    <input type="text" id="comment-${index}" placeholder="Add comment">
+                                                    <button onclick="addComment(${index})">Add Comment</button>
+                                                </td>
+                                            </tr>
+                                        `;
+                managerClaimsTableBody.innerHTML += row;
+            });
+        }
+
+        // Add Comment Functionality for Manager
+        function addComment(index) {
+            const commentInput = document.getElementById(`comment-${index}`);
+            const comment = commentInput.value;
+            if (comment) {
+                alert(`Comment added: ${comment}`);
+                commentInput.value = ''; // Clear the input after adding comment
+            } else {
+                alert('Please enter a comment.');
+            }
+        }
+
+        // Update claim status for both coordinator and manager
+        function updateStatus(index, status) {
+            claims[index].status = status;
+            loadCoordinatorClaims(); // Reload coordinator claims to reflect changes
+            updatePendingCount(); // Update pending count in sidebar
+            loadPendingClaims(); // Refresh pending claims in the sidebar
+        }
+    </script>
+
+</body>
+
+</html>
